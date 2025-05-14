@@ -1,4 +1,4 @@
-import { Category } from "./checklist.model.js"
+import { Category } from "../../shared/models/checklist.model.js"
 
 export const getCategories = async(req, res, next)=>{
     try{

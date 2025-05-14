@@ -1,7 +1,9 @@
-import {Category, SubCategory, Task} from '../checklist/checklist.model.js';
+import {Category, SubCategory, Task} from '../../shared/models/checklist.model.js';
+import { reorderTasks } from '../../shared/utils/taskutils.js';
 
 
 export const getCategories = async(req, res, next)=>{
+
 
     try{
         const categories = await Category.find();
@@ -239,3 +241,22 @@ export const deleteTask = async(req, res, next)=>{
         next(err)
     }
 };
+
+export const updateTaskArray = async(req, res, next)=>{
+    const {catId, subCatId} = req.params;
+    const taskOrder = req.body.taskOrder;
+
+    try{
+        const category = await Category.findOne({_id: catId});
+        const subcategory = category.subCategory.find(item=>item._id.toString()===subCatId.toString());
+        const reorderedTasks = reorderTasks(taskOrder,subcategory.tasks)
+        subcategory.tasks = reorderedTasks;
+        await category.save();
+        res.status(200).json({
+            message: 'Tasks re-arranged'
+        })
+    }
+    catch(err){
+        next(err)
+    }
+}

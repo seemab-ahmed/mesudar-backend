@@ -41,17 +41,31 @@ import cors from 'cors';
 
 import adminRoutes from './modules/admin/admin.routes.js';
 import checklistRoutes from './modules/checklist/checklist.routes.js';
+import authRoutes from './modules/auth/auth.routes.js';
 import dotenv from "dotenv";
 import https from 'https';
-import fs from "fs";
+import fs from'fs';
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/user',checklistRoutes)
+
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);  
+
+  
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal Server Error',
+    
+  });
+});
+
 
 await mongoose.connect(process.env.MONGO_URL)
 app.listen(3000,'0.0.0.0' , ()=>{
