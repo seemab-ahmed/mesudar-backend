@@ -1,5 +1,5 @@
 import {Category, SubCategory, Task} from '../../shared/models/checklist.model.js';
-import { reorderTasks } from '../../shared/utils/taskutils.js';
+import { reorder } from '../../shared/utils/admin.utils.js';
 
 
 export const getCategories = async(req, res, next)=>{
@@ -82,6 +82,46 @@ export const deleteCategory=async(req, res, next)=>{
     
 };
 
+export const reorderCategory = async (req, res, next) => {
+  const categoryOrder = req.body.categoryOrder; // array of _id's
+
+  try {
+    // Step 1: Fetch all categories whose _id is in categoryOrder
+    const categories = await Category.find({
+      _id: { $in: categoryOrder }
+    });
+
+    // Step 2: Reorder based on categoryOrder
+    const categoryMap = new Map();
+    categories.forEach((cat) => {
+      categoryMap.set(cat._id.toString(), cat); // map category by _id
+    });
+
+    const reorderedCategories = categoryOrder.map((id) =>
+      categoryMap.get(id)
+    );
+
+    // Step 3: Save the reordered categories in the DB
+    // This is where you update the order of the documents in the DB
+    const operations = reorderedCategories.map((category, index) => ({
+      updateOne: {
+        filter: { _id: category._id },
+        update: { $set: { order: index } }, // You can add any additional updates here
+      },
+    }));
+
+    // Execute all update operations
+    await Category.bulkWrite(operations);
+
+    res.status(200).json({
+      message: 'Categories reordered successfully!',
+      categories: reorderedCategories, // Optionally send back the reordered list
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // sub-Categories controllers
 
 export const addSubCategory = async(req, res, next)=>{
@@ -161,6 +201,28 @@ export const deleteSubCategory = async(req, res, next)=>{
 
     }
 };
+
+export const reorderSubCategory = async(req, res, next)=>{
+     const {catId} = req.params;
+    const subCategoryOrder = req.body.subCategoryOrder;
+
+    try{
+        const category = await Category.findOne({_id: catId});
+        
+        const reorderedSubCategory = reorder(subCategoryOrder,category.subCategory)
+        category.subCategory = reorderedSubCategory;
+        await category.save();
+        res.status(200).json({
+            message: 'Sub Categorires re-arranged'
+        })
+    }
+    catch(err){
+        next(err)
+    }
+
+
+
+}
 
 // task controllers
 export const addTask = async(req, res, next)=>{
@@ -249,7 +311,7 @@ export const updateTaskArray = async(req, res, next)=>{
     try{
         const category = await Category.findOne({_id: catId});
         const subcategory = category.subCategory.find(item=>item._id.toString()===subCatId.toString());
-        const reorderedTasks = reorderTasks(taskOrder,subcategory.tasks)
+        const reorderedTasks = reorder(taskOrder,subcategory.tasks)
         subcategory.tasks = reorderedTasks;
         await category.save();
         res.status(200).json({
