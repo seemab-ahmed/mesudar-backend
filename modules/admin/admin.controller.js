@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import {Category, SubCategory, Task} from '../../shared/models/checklist.model.js';
 import { reorder } from '../../shared/utils/admin.utils.js';
 import CategoryOrder from '../../shared/models/catagoryOrder.model.js';
+import Suggestion from '../suggestions/suggestions.model.js';
 
 
 
@@ -339,4 +340,29 @@ export const updateTaskArray = async(req, res, next)=>{
     catch(err){
         next(err)
     }
-}
+};
+
+// suggestion controllers for admin
+
+export const getSuggestions = async(req, res, next)=>{
+
+    try{
+        const suggestions = await Suggestion.find();
+        if(suggestions){
+            res.status(200).json({
+                message: 'All the suggestions',
+                suggestions: suggestions
+            })
+            return;
+        }
+
+        res.status(200).json({
+            message: 'No suggestions from any user'
+        })
+
+
+    }
+    catch(err){
+        next(err)
+    }
+};

@@ -42,6 +42,7 @@ import cors from 'cors';
 import adminRoutes from './modules/admin/admin.routes.js';
 import checklistRoutes from './modules/checklist/checklist.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
+import suggestionRoutes from './modules/suggestions/suggestions.routes.js';
 import dotenv from "dotenv";
 import https from 'https';
 import fs from'fs';
@@ -54,6 +55,7 @@ app.use(express.json());
 app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/user',checklistRoutes)
+app.use('/api/suggestion',suggestionRoutes);
 
 
 app.use((err, req, res, next) => {

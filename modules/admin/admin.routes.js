@@ -1,7 +1,7 @@
 import express from 'express';
 import {createCategory , editCatagory, getCategories,deleteCategory,
         addSubCategory, editSubCategory, deleteSubCategory,
-        addTask, editTask, deleteTask, updateTaskArray, reorderSubCategory, reorderCategory} from './admin.controller.js';
+        addTask, editTask, deleteTask, updateTaskArray, reorderSubCategory, reorderCategory, getSuggestions} from './admin.controller.js';
 import {auth} from '../../shared/middlewares/auth.middleware.js';
 
 const router = express.Router();
@@ -37,6 +37,11 @@ router.put('/task/:catId/:subCatId/:taskId', editTask)
 router.delete('/task/:catId/:subCatId/:taskId', deleteTask)
 
 router.put('/task/:catId/:subCatId', updateTaskArray);
+
+// suggestions routes
+
+router.get('/suggestions', getSuggestions)
+
 
 
 
