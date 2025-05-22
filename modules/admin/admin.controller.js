@@ -1,5 +1,9 @@
+
+import mongoose from 'mongoose';
 import {Category, SubCategory, Task} from '../../shared/models/checklist.model.js';
-import { reorderTasks } from '../../shared/utils/taskutils.js';
+import { reorder } from '../../shared/utils/admin.utils.js';
+import CategoryOrder from '../../shared/models/catagoryOrder.model.js';
+
 
 
 export const getCategories = async(req, res, next)=>{
@@ -9,10 +13,22 @@ export const getCategories = async(req, res, next)=>{
         const categories = await Category.find();
 
         if(categories.length>0){
+         const order = await CategoryOrder.find();
+         if(order){
+
+            const OrderedCategories = reorder(order[0].catOrder,categories)
             res.status(200).json({
+                message: 'These are categories',
+                categories: OrderedCategories
+            })
+            
+
+         }else{
+             res.status(200).json({
                 message: 'These are categories',
                 categories: categories
             })
+         }
             return;
         }
         res.status(200).json({
@@ -35,6 +51,9 @@ export const createCategory=async(req,res,next)=>{
     })
     try{
     const saved = await category.save();
+    const newOrder = await CategoryOrder.find();
+    newOrder[0].catOrder.push(category._id);
+    await newOrder[0].save();
     res.status(201).json({
         message:'Category added sucessfully',
         result: saved
@@ -71,6 +90,17 @@ export const deleteCategory=async(req, res, next)=>{
     const catId = req.params.catId;
     try{
         await Category.findByIdAndDelete({_id: catId})
+        const order = await CategoryOrder.findOne();
+        if(order){
+            const orderArray=order.catOrder.filter(item=>{
+             return item.toString() !== catId.toString();
+        })
+        order.catOrder = orderArray;
+         await order.save();
+        }
+        
+       
+        
         res.status(200).json({
             message: 'Category deleted sucessfully'
         })
@@ -80,6 +110,34 @@ export const deleteCategory=async(req, res, next)=>{
 
     }
     
+};
+
+export const reorderCategory = async (req, res, next) => {
+  const newCatOrder = req.body.categoryOrder; // array of _id's
+
+  try {
+    const categoryOrder = await CategoryOrder.find();
+    if(categoryOrder.length>0){
+        const existingOrder = categoryOrder[0];
+        existingOrder.catOrder = newCatOrder;
+        await existingOrder.save();
+    }
+    else{
+        
+        const newOrder = new CategoryOrder({
+        catOrder: newCatOrder
+    })
+    await newOrder.save();}
+
+    
+    res.status(201).json({
+        message: 'Categories order saved sucessfully'
+    
+    })
+   
+  } catch (err) {
+    next(err);
+  }
 };
 
 // sub-Categories controllers
@@ -161,6 +219,28 @@ export const deleteSubCategory = async(req, res, next)=>{
 
     }
 };
+
+export const reorderSubCategory = async(req, res, next)=>{
+     const {catId} = req.params;
+    const subCategoryOrder = req.body.subCategoryOrder;
+
+    try{
+        const category = await Category.findOne({_id: catId});
+        
+        const reorderedSubCategory = reorder(subCategoryOrder,category.subCategory)
+        category.subCategory = reorderedSubCategory;
+        await category.save();
+        res.status(200).json({
+            message: 'Sub Categorires re-arranged'
+        })
+    }
+    catch(err){
+        next(err)
+    }
+
+
+
+}
 
 // task controllers
 export const addTask = async(req, res, next)=>{
@@ -249,7 +329,7 @@ export const updateTaskArray = async(req, res, next)=>{
     try{
         const category = await Category.findOne({_id: catId});
         const subcategory = category.subCategory.find(item=>item._id.toString()===subCatId.toString());
-        const reorderedTasks = reorderTasks(taskOrder,subcategory.tasks)
+        const reorderedTasks = reorder(taskOrder,subcategory.tasks)
         subcategory.tasks = reorderedTasks;
         await category.save();
         res.status(200).json({
