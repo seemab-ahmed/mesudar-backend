@@ -1,13 +1,21 @@
 import mongoose from 'mongoose';
 
 const suggestionSchema = new mongoose.Schema({
-  title: {
+  subject: {
     type: String,
-    required: true,  // Title should be required
+    required: true,  
   },
-  description: {
+  message: {
     type: String,
-    required: true,  // Description should be required
+    required: true,  
+  },
+  userName: {
+    type: String,
+    required: true
+  },
+  email: {
+    type: String,
+    required: true
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -16,7 +24,7 @@ const suggestionSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,  // Automatically set the current date when the suggestion is created
+    default: Date.now,  
   },
 });
 
