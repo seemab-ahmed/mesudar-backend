@@ -1,12 +1,14 @@
 import Suggestion from "./suggestions.model.js";
 
 export const postSuggestion = async(req, res, next) =>{
-    const title = req.body.title;
-    const message = req.body.description;
+    const {subject, message, email, name} = req.body;
     try{
         const suggestion = new Suggestion({
-            title: title,
-            description: message
+            userName: name,
+            email: email,
+            subject: subject,
+            message: message,
+            
         })
         await suggestion.save();
         res.status(201).json({
