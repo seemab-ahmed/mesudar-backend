@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 
 const suggestionSchema = new mongoose.Schema({
-  subject: {
-    type: String,
-    required: true,  
-  },
   message: {
     type: String,
     required: true,  
