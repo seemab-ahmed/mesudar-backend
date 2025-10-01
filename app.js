@@ -3,6 +3,7 @@ import adminRoutes from './modules/admin/admin.routes.js';
 import checklistRoutes from './modules/checklist/checklist.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import suggestionRoutes from './modules/suggestions/suggestions.routes.js';
+import exportRoutes from './modules/export/export.routes.js';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
@@ -27,6 +28,7 @@ app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/user',checklistRoutes)
 app.use('/api/suggestion',suggestionRoutes);
+app.use('/api/export',exportRoutes);
 // Database Connection
 await mongoose.connect(process.env.MONGO_URL);
 
