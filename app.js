@@ -43,6 +43,7 @@ import adminRoutes from './modules/admin/admin.routes.js';
 import checklistRoutes from './modules/checklist/checklist.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import suggestionRoutes from './modules/suggestions/suggestions.routes.js';
+import exportRoutes from './modules/export/export.routes.js';
 import dotenv from "dotenv";
 import https from 'https';
 import fs from'fs';
@@ -50,12 +51,13 @@ dotenv.config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Increase size limit for PDF base64 data
 
 app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
-app.use('/api/user',checklistRoutes)
+app.use('/api/user',checklistRoutes);
 app.use('/api/suggestion',suggestionRoutes);
+app.use('/api/export',exportRoutes);
 
 
 app.use((err, req, res, next) => {
