@@ -1,4 +1,6 @@
 
+// Live server code with SSL configuration
+
 import adminRoutes from './modules/admin/admin.routes.js';
 import checklistRoutes from './modules/checklist/checklist.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
@@ -21,14 +23,15 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // Routes
 app.use('/api/auth',authRoutes);
 app.use('/api/admin',adminRoutes);
 app.use('/api/user',checklistRoutes)
 app.use('/api/suggestion',suggestionRoutes);
 app.use('/api/export',exportRoutes);
+
 // Database Connection
 await mongoose.connect(process.env.MONGO_URL);
 
@@ -47,7 +50,7 @@ https.createServer(options, app).listen(5000, '0.0.0.0', () => {
 
 
 
-
+// // local server code without SSL configuration
 // import express from 'express';
 // import mongoose from 'mongoose';
 // import cors from 'cors';
